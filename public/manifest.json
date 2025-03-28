@@ -1,0 +1,16 @@
+{
+ "name": "BingoGame",
+ "short_name": "Bingo",
+ "description": "A Online Multiplayer Bingo Game",
+ "start_url": "/",
+ "display": "standalone",
+ "background_color": "#ffffff",
+ "theme_color": "#0078d7",
+ "icons": [
+   {
+     "src": "/IconBingo.jpg",
+     "sizes": "192x192",
+     "type": "image/jpg"
+   }
+ ]
+}
