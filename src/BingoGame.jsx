@@ -32,10 +32,10 @@ const BingoCell = ({ value, onClick, disabled }) => (
     disabled={disabled}
     className={`w-16 h-16 flex justify-center items-center text-lg font-semibold border-2 rounded-md ${
       value === "X"
-        ? "bg-red-400 text-white"
+        ? "bg-red-400 text-white border-gray-300"
         : value === null
-        ? "bg-white"
-        : "bg-green-500 text-gray-900"
+        ? "bg-white "
+        : "bg-green-500 text-black border-gray-900"
     }`}
   >
     {value}

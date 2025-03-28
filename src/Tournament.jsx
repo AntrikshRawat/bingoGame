@@ -41,7 +41,7 @@ export default function Tournament() {
   return (
     <div className="flex flex-wrap justify-center items-center h-screen bg-gradient-to-br from-gray-800 via-gray-700 to-gray-950">
       Just wait for One more day.......
-      {/* <div className="bg-gray-800 p-6 rounded-2xl shadow-lg w-96 text-center">
+      <div className="bg-gray-800 p-6 rounded-2xl shadow-lg w-96 text-center">
       <button className='bg-slate-600 hover:bg-slate-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-all mb-4' onClick={shuffleIndices}>Shuffle Players</button>
         <h2 className="flex justify-center content-center text-xl font-bold text-gray-300 mb-4">Tournament ID: {tId}
           <GiShare className="m-1 hover:cursor-pointer" onClick={shareRoom} />
@@ -68,7 +68,7 @@ export default function Tournament() {
             Start Tournament
           </button>
         </div>
-      </div> */}
+      </div>
     </div>
   );
 }
