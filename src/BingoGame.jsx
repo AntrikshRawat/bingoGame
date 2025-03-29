@@ -55,7 +55,6 @@ const BingoGame = () => {
   const [waiting, setWaiting] = useState(false);
   const [isTurn, setIsTurn] = useState(false);
   const gridRef = useRef(grid);
-
   useEffect(() => {
     gridRef.current = grid;
     setBingoCount(calculateBingos(grid));
@@ -68,7 +67,8 @@ const BingoGame = () => {
   }, [bingoCount, roomCode]);
 
   useEffect(() => {
-    const name = localStorage.getItem('userName');
+    let name = localStorage.getItem('userName');
+    name = name.length>0?name:`Player${Date.now()}`;
     socket.emit("joinRoom", roomCode,name,(message)=>{
       if(message) {
         alert(message);
