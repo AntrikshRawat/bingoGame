@@ -99,15 +99,15 @@ const CreateAndJoin = () => {
       {!showJoinInput && (
         <button
         onClick={()=>{handleCreateRoom(2)}}
-          className="w-48 h-12 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-lg hover:from-blue-600 hover:to-blue-800 transition-all shadow-md"
+          className="w-48 h-12 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-lg hover:from-blue-600 hover:to-blue-800 hover:brightness-125 hover:scale-105 transition-all shadow-md"
         >
           Create Room
         </button>
       )}
       {!showJoinInput && (
         <button
-          onClick={()=>{handleCreateRoom(4)}}
-          className="w-48 h-12 bg-gradient-to-r from-red-500 to-blue-700 text-white rounded-lg hover:from-blue-600 hover:to-red-600 transition-all shadow-md"
+          onClick={()=>{handleCreateRoom(4)}} 
+          className="w-48 h-12 bg-gradient-to-br from-[#00a9a5] via-[#0b5351] to-[#092327] text-white rounded-lg transition-all shadow-md hover:brightness-125 hover:scale-105"
         >
           Create Tournament
         </button>
@@ -127,7 +127,7 @@ const CreateAndJoin = () => {
             onClick={handleJoinWithCode}
             className="w-48 h-12 bg-gradient-to-r from-green-500 to-green-700 text-white rounded-lg hover:from-green-600 hover:to-green-800 transition-all shadow-md"
           >
-            Join Room
+            Join
           </button>
           {errorMessage && (
             <p className="text-red-600 font-bold mt-2">{errorMessage}</p>
@@ -136,7 +136,7 @@ const CreateAndJoin = () => {
       ) : (
         <button
           onClick={handleJoinRoomClick}
-          className="w-48 h-12 bg-gradient-to-r from-green-500 to-green-700 text-white rounded-lg hover:from-green-600 hover:to-green-800 transition-all shadow-md"
+          className="w-48 h-12 bg-gradient-to-r from-green-500 to-green-700 text-white rounded-lg hover:from-green-600 hover:to-green-800 hover:brightness-125 hover:scale-105 transition-all shadow-md"
         >
           Join Room/Tournament
         </button>
