@@ -113,6 +113,9 @@ const BingoGame = () => {
         setIsTurn(turn);
       }
     });
+    return()=> {
+      socket.emit("leaveroom",roomCode);
+    }
   }, [roomCode,navigator]);
 
   const handleCellClick = (row, col) => {

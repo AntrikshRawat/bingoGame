@@ -45,16 +45,24 @@ const CreateAndJoin = () => {
       setErrorMessage('Invalid room code. Please enter a valid 8-character code.');
       return;
     }
-  
-    // Check if the room exists
-    socket.emit('checkRoom', joinCode.trim(), (message) => {
-      if (!message.status) {
-        setErrorMessage(message.message);
-        return;
+
+    socket.emit("checkRoom",joinCode.trim(),(msg)=>{
+      if(!msg) {
+        socket.emit("checkTour",joinCode.trim(),(message)=>{
+          if(!message.status){
+            setErrorMessage(message.message);
+            return;
+          }
+          setErrorMessage("");
+          navigate(`tournament/${joinCode.trim()}`);
+        })
       }
-      setErrorMessage('');
-      navigate(`/room/${joinCode.trim()}`);
-    });
+      else if(!msg.status) {
+        setErrorMessage(msg.message);
+      } else{
+        navigate(`room/${joinCode.trim()}`);
+      }
+    })
   };
   function getName() {
     let name = localStorage.getItem('userName');
@@ -112,7 +120,7 @@ const CreateAndJoin = () => {
             type="text"
             value={joinCode}
             onChange={(e) => setJoinCode(e.target.value)}
-            placeholder="Enter Room Code"
+            placeholder="Enter Room/Tournament Code"
             className="bg-white w-60 h-12 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <button
@@ -130,7 +138,7 @@ const CreateAndJoin = () => {
           onClick={handleJoinRoomClick}
           className="w-48 h-12 bg-gradient-to-r from-green-500 to-green-700 text-white rounded-lg hover:from-green-600 hover:to-green-800 transition-all shadow-md"
         >
-          Join Room
+          Join Room/Tournament
         </button>
       )}
     </div>
