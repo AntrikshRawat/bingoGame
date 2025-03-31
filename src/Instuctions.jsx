@@ -6,7 +6,7 @@ const Instructions = () => {
   };
 
   return (
-    <footer className="w-full bg-gray-900 text-white py-10 px-6 mt-10 relative">
+    <footer className="w-full bg-gray-900 text-white py-10 px-6 relative">
       <div className="max-w-5xl mx-auto">
         <h2 className="text-3xl font-bold flex items-center gap-3 mb-6 text-left">
           <FaGamepad className="text-blue-400 text-4xl" /> How to Play Bingo
