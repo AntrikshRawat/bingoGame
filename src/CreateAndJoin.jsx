@@ -68,6 +68,8 @@ const CreateAndJoin = () => {
     let name = localStorage.getItem('userName');
     if(name !== '' && name) {
       setUserName(name);
+    }else{
+      localStorage.setItem('userName',`Player${Date.now().toString().slice(10)}`);
     }
   }
   useEffect(()=>{
