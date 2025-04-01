@@ -74,7 +74,7 @@ const CreateAndJoin = () => {
   }
   useEffect(()=>{
     getName();
-  },[userName]);
+  },[]);
   return (
     <div className="flex flex-col items-center gap-4 min-h-screen justify-center">
      {userName && <h2 className='text-white text-md font-bold -mb-5'>Welcome {userName} to</h2>}
