@@ -6,12 +6,12 @@ const Instructions = () => {
   };
 
   return (
-    <footer className="w-full bg-gray-900 text-white py-10 px-6 relative">
-      <div className="max-w-5xl mx-auto">
+    <footer className="w-full bg-gray-900 text-white pb-10 px-6 relative">
+      <div className="max-w-5xl mx-auto flex flex-wrap justify-center items-center">
         <h2 className="text-3xl font-bold flex items-center gap-3 mb-6 text-left">
           <FaGamepad className="text-blue-400 text-4xl" /> How to Play Bingo
         </h2>
-        <div className="w-full max-w-4xl border-l-4 border-blue-400 pl-6 py-4 bg-gray-800 text-gray-300 rounded-lg shadow-lg">
+        <div className="w-full max-w-4xl border-l-4 border-blue-400 px-6 py-4 bg-gray-800 text-gray-300 rounded-lg shadow-lg">
           <ul className="list-disc pl-6 space-y-3 text-lg text-left">
             <li>Each player gets a 5x5 Bingo card with random numbers.</li>
             <li>The center space is a free spot.</li>
