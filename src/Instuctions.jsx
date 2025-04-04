@@ -1,10 +1,34 @@
+import { useEffect, useState } from "react";
 import { FaGamepad } from "react-icons/fa";
 
+const messages = ["Game Instructions","Any Suggestions?"];
 const Instructions = () => {
+  const[message, setMessage] = useState(messages[0]);
   const scrollToBottom = () => {
+    if(message === messages[0]) {
     window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+    }
+    else{
+      window.scrollTo({ 
+        top: document.documentElement.scrollHeight - window.innerHeight - 500, 
+        behavior: "smooth" 
+    });
+    }
   };
 
+  useEffect(()=>{
+    setTimeout(()=>{
+      if(message === messages[0]) {
+        setMessage(messages[1]);
+      }
+      else{
+        setMessage(messages[0]);
+      }
+    },2000)
+    return () => {
+      clearTimeout();
+    }
+  },[message])
   return (
     <footer className="w-full bg-gray-900 text-white pb-10 px-6 relative">
       <div className="max-w-5xl mx-auto flex flex-wrap justify-center items-center">
@@ -28,7 +52,7 @@ const Instructions = () => {
       <button 
         onClick={scrollToBottom} 
         className="fixed bottom-4 right-6 bg-blue-500 hover:bg-blue-600 text-white py-3 px-6 rounded-full shadow-lg text-lg z-50">
-        Game Instructions
+       {message}
       </button>
     </footer>
   );
