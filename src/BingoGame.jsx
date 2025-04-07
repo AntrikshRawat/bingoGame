@@ -1,31 +1,23 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { io } from "socket.io-client";
 import { GiShare } from "react-icons/gi";
 import PlayerSidebar from "./PlayerSidebar";
+import socket from "./socket";
+import cellclick from "../Sound-Effect/clicksound.wav";
 
-// Socket initialization
-const url = import.meta.env.VITE_BACKEND_URL;
-const socket = io(url);
+const cellClickSound = new Audio(cellclick);
 
-// Utility functions
 const calculateBingos = (grid) => {
   let count = 0;
-  // Check rows
   for (let i = 0; i < 5; i++) {
     if (grid[i].every((cell) => cell === "X")) count++;
-  }
-  // Check columns
-  for (let i = 0; i < 5; i++) {
     if (grid.map((row) => row[i]).every((cell) => cell === "X")) count++;
   }
-  // Check diagonals
   if ([0, 1, 2, 3, 4].every((i) => grid[i][i] === "X")) count++;
   if ([0, 1, 2, 3, 4].every((i) => grid[i][4 - i] === "X")) count++;
   return count;
 };
 
-// Cell Component
 const BingoCell = ({ value, onClick, disabled }) => (
   <button
     onClick={onClick}
@@ -34,7 +26,7 @@ const BingoCell = ({ value, onClick, disabled }) => (
       value === "X"
         ? "bg-red-400 text-white border-gray-300"
         : value === null
-        ? "bg-white "
+        ? "bg-white"
         : "bg-green-500 text-black border-gray-900"
     }`}
   >
@@ -44,205 +36,232 @@ const BingoCell = ({ value, onClick, disabled }) => (
 
 const BingoGame = () => {
   const { roomCode } = useParams();
+  const navigate = useNavigate();
+
   const [grid, setGrid] = useState(Array(5).fill(null).map(() => Array(5).fill(null)));
   const [availableNumbers, setAvailableNumbers] = useState(
-    Array.from({ length: 25 }, (_, index) => index + 1)
+    Array.from({ length: 25 }, (_, i) => i + 1)
   );
-  const navigator = useNavigate();
   const [gameStarted, setGameStarted] = useState(false);
   const [bingoCount, setBingoCount] = useState(0);
   const [winner, setWinner] = useState(null);
   const [waiting, setWaiting] = useState(false);
   const [isTurn, setIsTurn] = useState(false);
+  const [isTour, setIsTour] = useState(false);
+  const [round, setRound] = useState(0);
+  const [isWinner, setIsWinner] = useState(false);
+  const [isBackTrigger, setIsBackTrigger] = useState(false);
+  const[Socket,setSocket]=useState(socket);
+  useEffect(()=>{
+    setSocket(socket);
+  },[Socket])
   const gridRef = useRef(grid);
+
   useEffect(() => {
     gridRef.current = grid;
-    setBingoCount(calculateBingos(grid));
-  }, [grid]);
+    const count = calculateBingos(grid);
+    if (count !== bingoCount) setBingoCount(count);
+  }, [grid, bingoCount]);
+
+  useEffect(() => {
+    Socket.on("istournament", ({ status, round, isWinner }) => {
+      setIsTour(status);
+      setRound(round);
+      setIsWinner(isWinner);
+    });
+  }, [Socket]);
 
   useEffect(() => {
     if (bingoCount >= 5) {
-      socket.emit("gameOver", roomCode);
+      Socket.emit("gameOver", roomCode);
+      if (isTour) {
+        setTimeout(() => {
+          round === 1
+            ? Socket.emit("roundover", roomCode)
+            : Socket.emit("finalEnd", roomCode, isWinner);
+        }, 2000);
+      }
     }
-  }, [bingoCount, roomCode]);
+  }, [bingoCount, isTour, round, roomCode, isWinner,Socket]);
 
   useEffect(() => {
-    let name = localStorage.getItem('userName');
-    name = name.length>0?name:`Player${Date.now()}`;
-    socket.emit("joinRoom", roomCode,name,(message)=>{
-      if(message) {
-        alert(message);
-        setTimeout(() => {
-          navigator('/');
-        }, 100);
-      }
-    });
-    socket.on('roomState', (room) => {
-      setGameStarted(room.gameStarted);
-    });
-
-    socket.on('gameResult', (result) => {
-      setWinner(result ? 'win' : 'lose');
-    });
-
-    socket.on('startGame', (room) => {
-      setGameStarted(room.gameStarted);
+    const name = localStorage.getItem("userName");
+    const handleConnect = () => {
+      Socket.emit("joinRoom", roomCode, name, (message) => {
+        if (message) {
+          alert(message);
+          setTimeout(() => {
+            navigate('/');
+          }, 100);
+        }
+      });
+    };
+    handleConnect();
+    Socket.on("roomState", ({ gameStarted }) => setGameStarted(gameStarted));
+    Socket.on("gameResult", (result) => setWinner(result ? "win" : "lose"));
+    Socket.on("startGame", ({ gameStarted }) => {
+      setGameStarted(gameStarted);
       setWaiting(false);
     });
-
-    socket.on('updateCell', (val) => {
-      const updatedGrid = gridRef.current.map(row =>
-        row.map(cell => (cell === val ? "X" : cell))
+    Socket.on("updateCell", (val) => {
+      setGrid((prevGrid) =>
+        prevGrid.map((row) => row.map((cell) => (cell === val ? "X" : cell)))
       );
-      setGrid(updatedGrid);
     });
-
-    socket.on("resetGame", (room, newGrid) => {
-      if (roomCode === room) {
+    Socket.on("resetGame", (room, newGrid) => {
+      if (room === roomCode) {
         setGameStarted(false);
         setBingoCount(0);
         setWaiting(false);
         setWinner(null);
         setGrid(newGrid);
-        setAvailableNumbers(Array.from({ length: 25 }, (_, index) => index + 1));
+        setAvailableNumbers(Array.from({ length: 25 }, (_, i) => i + 1));
       }
+    });
+    Socket.on("changeTurn", (room, turn) => {
+      if (room === roomCode) setIsTurn(turn);
+    });
+    Socket.on("backToTour", (tourId) => {
+      setIsBackTrigger(true);
+      navigate(`/tournament/${tourId}`);
     });
 
-    socket.on("changeTurn", (roomCodeFromServer, turn) => {
-      if (roomCodeFromServer === roomCode) {
-        setIsTurn(turn);
-      }
-    });
-    return()=> {
-      socket.emit("leaveroom",roomCode);
-    }
-  }, [roomCode,navigator]);
+  window.onpopstate=()=>{
+    Socket.emit("leaveroom", roomCode);
+    Socket.emit("leavetour", roomCode);
+  }    
+  }, [roomCode, isBackTrigger, Socket]);
 
   const handleCellClick = (row, col) => {
-    if ((!gameStarted && grid[row][col] !== null) || (gameStarted && grid[row][col] === 'X')) {
-      alert('Cell already filled');
-    } else if (!gameStarted && grid[row][col] === null) {
-      const newGrid = [...grid];
-      newGrid[row][col] = availableNumbers[0];
+    const cell = grid[row][col];
+    if (!gameStarted && cell !== null) return alert("Cell already filled");
+    cellClickSound.play();
+    if (!gameStarted && cell === null) {
+      const newGrid = grid.map((r, i) =>
+        r.map((c, j) => (i === row && j === col ? availableNumbers[0] : c))
+      );
       setGrid(newGrid);
-      setAvailableNumbers(availableNumbers.slice(1));
-    } else {
-      socket.emit("cellClick", roomCode, grid[row][col]);
+      setAvailableNumbers((prev) => prev.slice(1));
+    } else if (gameStarted && cell !== "X") {
+      Socket.emit("cellClick", roomCode, cell);
     }
   };
 
   const handleStartGame = () => {
-    if (grid.every((row) => row.every((cell) => cell !== null))) {
-      setWaiting(true);
-      socket.emit("submitGrid", roomCode);
-    } else {
-      alert("Please fill all the cells!");
-    }
+    if (grid.flat().includes(null)) return alert("Please fill all the cells!");
+    setWaiting(true);
+    Socket.emit("submitGrid", roomCode);
   };
 
   const handleResetGame = () => {
     const emptyGrid = Array(5).fill(null).map(() => Array(5).fill(null));
-    socket.emit("resetGame", roomCode, emptyGrid);
+    Socket.emit("resetGame", roomCode, emptyGrid);
   };
 
   const handleFillGrid = () => {
-    const shuffledNumbers = [...availableNumbers].sort(() => Math.random() - 0.5);
-    const newGrid = grid.map(row => [...row]);
-    let numberIndex = 0;
-
-    for (let i = 0; i < 5; i++) {
-      for (let j = 0; j < 5; j++) {
-        if (newGrid[i][j] === null && shuffledNumbers[numberIndex]) {
-          newGrid[i][j] = shuffledNumbers[numberIndex++];
+    const shuffled = [...availableNumbers].sort(() => Math.random() - 0.5);
+    let idx = 0;
+    let delay = 0;
+    const newGrid = grid.map(row => [...row]); // Clone grid
+  
+    for (let i = 0; i < newGrid.length; i++) {
+      for (let j = 0; j < newGrid[i].length; j++) {
+        if (newGrid[i][j] === null && idx < shuffled.length) {
+          setTimeout(() => {
+            newGrid[i][j] = shuffled[idx++];
+            setGrid([...newGrid]);
+           // Trigger re-render with new state
+          }, delay);
+          delay += 30; // Add delay between cell fills
         }
       }
     }
-
-    setGrid(newGrid);
-    setAvailableNumbers(shuffledNumbers.slice(numberIndex));
+  
+    setTimeout(() => {
+      setAvailableNumbers(shuffled.slice(idx));
+    }, delay);
   };
+  
 
   const shareRoom = async () => {
-    if (window.navigator.share) {
+    if (navigator.share) {
       try {
-        await window.navigator.share({
-          title: 'Bingo Game',
-          text: 'Join my Bingo Room and play with me',
+        await navigator.share({
+          title: "Bingo Game",
+          text: "Join my Bingo Room and play with me",
           url: `https://bingo-f.vercel.app/room/${roomCode}`,
         });
-      } catch (error) {
-        console.error('Error sharing:', error);
+      } catch (err) {
+        console.error("Share failed:", err);
       }
     } else {
-      alert('Sharing is not supported in your browser.');
+      alert("Sharing not supported in your browser.");
     }
   };
 
   return (
     <>
-    <PlayerSidebar socket = {socket} roomCode= {roomCode}/>
-    <div className="min-h-screen flex flex-col items-center text-white py-10">
-      <h1 className="text-4xl font-bold mb-6">🎉 Bingo Game 🎲</h1>
-      
-      <div className="flex flex-col items-center gap-4">
-        <button 
-          onClick={handleFillGrid}
-          className="bg-blue-600 p-2 rounded-lg hover:bg-blue-800"
-        >
-          Fill Randomly
-        </button>
-        
-        <h3 className="text-xl m-2 mt-3 flex items-center">
-          Room Code: {roomCode}
-          <GiShare className="mx-2 hover:cursor-pointer" onClick={shareRoom}/>
-        </h3>
-      </div>
+      <PlayerSidebar socket={Socket} roomCode={roomCode} />
+      <div className="min-h-screen flex flex-col items-center text-white py-10">
+        <h1 className="text-4xl font-bold mb-6">🎉 Bingo Game 🎲</h1>
 
-      <div className="text-center mb-5">
-        {gameStarted && (
-          <>
-            <h3 className="text-xl mb-2">Bingo Count: {bingoCount} / 5</h3>
-            <h3 className={`${isTurn?'text-2xl animate-bounce text-purple-900 font-extrabold':'text-xl'}`}>{isTurn ? 'Your Turn' : 'Opponent Turn'}</h3>
-          </>
-        )}
-        
-        {winner === 'win' && (
-          <h2 className="text-2xl font-bold mt-5">
-            🎉 Bingo! You Won The Game 🎉
-          </h2>
-        )}
-        
-        {winner === 'lose' && (
-          <h2 className="text-2xl font-bold mt-5">
-            🥲 You Lose !! Better Luck next time
-          </h2>
-        )}
-      </div>
+        <div className="flex flex-col items-center gap-4">
+          <button
+            onClick={handleFillGrid}
+            className="bg-blue-600 p-2 rounded-lg hover:bg-blue-800"
+          >
+            Fill Randomly
+          </button>
 
-      <div className="grid grid-cols-5 gap-2">
-        {grid.map((row, rowIndex) =>
-          row.map((cell, colIndex) => (
-            <BingoCell
-              key={`${rowIndex}-${colIndex}`}
-              value={cell}
-              onClick={() => handleCellClick(rowIndex, colIndex)}
-              disabled={!isTurn && gameStarted}
-            />
-          ))
-        )}
-        
-      </div>
-      {!gameStarted && !winner && (
+          <h3 className="text-xl mt-3 flex items-center">
+            Room Code: {roomCode}
+            <GiShare className="mx-2 hover:cursor-pointer" onClick={shareRoom} />
+          </h3>
+        </div>
+
+        <div className="text-center mb-5">
+          {gameStarted && (
+            <>
+              <h3 className="text-xl mb-2">Bingo Count: {bingoCount} / 5</h3>
+              <h3 className={`${isTurn ? "text-2xl animate-bounce text-purple-900 font-extrabold" : "text-xl"}`}>
+                {isTurn ? "Your Turn" : "Opponent Turn"}
+              </h3>
+            </>
+          )}
+
+          {winner === "win" && (
+            <h2 className="text-2xl font-bold mt-5">🎉 Bingo! You Won The Game 🎉</h2>
+          )}
+
+          {winner === "lose" && (
+            <h2 className="text-2xl font-bold mt-5">🥲 You Lost! Better Luck Next Time</h2>
+          )}
+        </div>
+
+        <div className="grid grid-cols-5 gap-2">
+          {grid.map((row, rowIdx) =>
+            row.map((cell, colIdx) => (
+              <BingoCell
+                key={`${rowIdx}-${colIdx}`}
+                value={cell}
+                onClick={() => handleCellClick(rowIdx, colIdx)}
+                disabled={gameStarted && !isTurn}
+              />
+            ))
+          )}
+        </div>
+
+        {!gameStarted && !winner && (
           <button
             onClick={handleStartGame}
             disabled={waiting}
             className="my-5 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white text-lg rounded-lg shadow-lg"
           >
-            🎮 {waiting ? 'Waiting for Opponent...' : 'Start Game'}
+            🎮 {waiting ? "Waiting for Opponent..." : "Start Game"}
           </button>
         )}
 
-        {(winner || gameStarted) && (
+        {(winner || gameStarted) && !isTour && (
           <button
             onClick={handleResetGame}
             className="my-5 px-6 py-3 bg-red-600 hover:bg-red-700 text-white text-lg rounded-lg shadow-lg"
@@ -250,7 +269,7 @@ const BingoGame = () => {
             🔄 Reset Game
           </button>
         )}
-    </div>
+      </div>
     </>
   );
 };

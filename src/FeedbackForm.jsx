@@ -4,7 +4,6 @@ import Alert from './Alert';
 const FeedbackForm = () => {
   const [formData, setFormData] = useState({
     name: '',
-    email: '',
     message: ''
   });
   const [alert, setAlert] = useState({
@@ -29,7 +28,7 @@ const FeedbackForm = () => {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        access_key: '1493b952-0c2f-44d5-a187-e8bc160a2eaf',
+        access_key: import.meta.env.VITE_ACCESS_KEY,
         subject: 'New Contact Form Submission from Bingo Website',
         from_name: 'Bingo Website',
         name: formData.name,
