@@ -4,6 +4,7 @@ import { GiShare } from "react-icons/gi";
 import PlayerSidebar from "./PlayerSidebar";
 import socket from "./socket";
 import cellclick from "../Sound-Effect/clicksound.wav";
+import BackButton from "./BackButton";
 
 const cellClickSound = new Audio(cellclick);
 
@@ -48,7 +49,7 @@ const BingoGame = () => {
   const [waiting, setWaiting] = useState(false);
   const [isTurn, setIsTurn] = useState(false);
   const [isTour, setIsTour] = useState(false);
-  const [round, setRound] = useState(0);
+  const [round, setRound] = useState(1);
   const [isWinner, setIsWinner] = useState(false);
   const [isBackTrigger, setIsBackTrigger] = useState(false);
   const[Socket,setSocket]=useState(socket);
@@ -67,6 +68,7 @@ const BingoGame = () => {
     Socket.on("istournament", ({ status, round, isWinner }) => {
       setIsTour(status);
       setRound(round);
+      localStorage.setItem('round',round)
       setIsWinner(isWinner);
     });
   }, [Socket]);
@@ -104,6 +106,7 @@ const BingoGame = () => {
       setWaiting(false);
     });
     Socket.on("updateCell", (val) => {
+      cellClickSound.play();
       setGrid((prevGrid) =>
         prevGrid.map((row) => row.map((cell) => (cell === val ? "X" : cell)))
       );
@@ -125,17 +128,21 @@ const BingoGame = () => {
       setIsBackTrigger(true);
       navigate(`/tournament/${tourId}`);
     });
-
   window.onpopstate=()=>{
     Socket.emit("leaveroom", roomCode);
+    if(!isBackTrigger) {
     Socket.emit("leavetour", roomCode);
-  }    
-  }, [roomCode, isBackTrigger, Socket]);
+    const name = localStorage.getItem('userName');
+    localStorage.clear();
+    localStorage.setItem('userName',name);
+    }
+  }
+  }, [roomCode, isBackTrigger, Socket,navigate]);
 
   const handleCellClick = (row, col) => {
+    cellClickSound.play();
     const cell = grid[row][col];
     if (!gameStarted && cell !== null) return alert("Cell already filled");
-    cellClickSound.play();
     if (!gameStarted && cell === null) {
       const newGrid = grid.map((r, i) =>
         r.map((c, j) => (i === row && j === col ? availableNumbers[0] : c))
@@ -167,6 +174,7 @@ const BingoGame = () => {
     for (let i = 0; i < newGrid.length; i++) {
       for (let j = 0; j < newGrid[i].length; j++) {
         if (newGrid[i][j] === null && idx < shuffled.length) {
+          cellClickSound.play();
           setTimeout(() => {
             newGrid[i][j] = shuffled[idx++];
             setGrid([...newGrid]);
@@ -202,9 +210,10 @@ const BingoGame = () => {
   return (
     <>
       <PlayerSidebar socket={Socket} roomCode={roomCode} />
+      <BackButton/>
       <div className="min-h-screen flex flex-col items-center text-white py-10">
         <h1 className="text-4xl font-bold mb-6">🎉 Bingo Game 🎲</h1>
-
+      {isTour &&  <h1 className="text-2xl font-bold mb-6">Round:-{round}</h1>}
         <div className="flex flex-col items-center gap-4">
           <button
             onClick={handleFillGrid}

@@ -4,14 +4,18 @@ import { Menu, X } from "lucide-react";
 const PlayerSidebar = ({socket}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [players,setPlayers] = useState([]);
+  const[Socket,setSocket] = useState(socket);
+  useEffect(()=>{
+    setSocket(socket);
+  },[socket]);
   useEffect(()=>{
     const name = localStorage.getItem('userName');
     setPlayers([name?name:'Player']);
-    socket.on('playersName', (names) => {
+    Socket.on('playersName', (names) => {
       const updatedNames = names.map(name => name.trim().length === 0 ? "Player" : name);
       setPlayers([...updatedNames]);
     });
-  },[socket])
+  },[Socket])
   return (
     <div className={`fixed top-0 right-0 h-full flex flex-col z-50 ${isOpen?'':'md:w-fit w-10'}`}>
       {/* Mobile Toggle Button */}
