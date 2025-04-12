@@ -19,7 +19,7 @@ const InsideDiv = ({index,player})=>{
             <span className={`font-semibold mr-3 text-xl ${positions[index].text}`}>
               {positions[index].label}
             </span>
-            <span className={`${positions[index].text} font-medium ml-3 text-xl flex justify-center items-center`}>{`${player}`.toUpperCase()}{player==='Waiting...'?<LuLoaderPinwheel className='animate-spin'/>:''}</span>
+            <span className={`${positions[index].text} font-medium text-xl flex justify-center items-center`}>{`${player}`.toUpperCase()}{player==='Waiting...'?<LuLoaderPinwheel className='animate-spin'/>:''}</span>
           </div>
   )
 }
@@ -41,7 +41,7 @@ const FinalRound = ({socket}) => {
     })
   })
   return (
-    <div className="min-w-lg mx-auto p-6 rounded-2xl shadow-lg bg-gray-900 text-white">
+    <div className="w-lg mx-4 p-6 rounded-2xl shadow-lg bg-gray-900 text-white">
       <h2 className="text-2xl font-bold text-center mb-6 text-purple-400">🏆 Final Result</h2>
  { end && <div className="space-y-4">
         <InsideDiv key={0} index={0} player={winners[0]?winners[0]:"Waiting..."}/>
