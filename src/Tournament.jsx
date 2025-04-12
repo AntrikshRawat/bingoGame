@@ -5,7 +5,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 
 import socket from "./socket";
 import BackButton from './BackButton';
-import Alert from './Alert';
+import Alert from "./Alert";
 const InsideDiv = ({index,player})=>{
   const positions = [
     { label: "🥇 First", bg: "bg-[#FFD700]", text: "text-black" },
@@ -61,7 +61,7 @@ export default function Tournament() {
   const[players,setPlayers] = useState(['']);
   const[isHost,setIsHost] = useState(false);
   const[round,setRound] = useState(0);
-    const [alert, setAlert] = useState({
+    const [alertMsg, setAlertMsg] = useState({
       message: '',
       type: ''
     });
@@ -102,16 +102,16 @@ useEffect(() => {
 },[roomCode,Socket,round]);
 
 useEffect(()=>{
-    if(alert.message !== '' && alert.message) {
+    if(alertMsg.message !== '' && alertMsg.message) {
       setTimeout(() => {
-        setAlert({
+        setAlertMsg({
           message:'',
           type:''
         })
       }, 1000);
     }
     return clearTimeout();
-  },[alert])
+  },[alertMsg])
 
 useEffect(()=>{
 Socket.on('host',(hostData)=>{
@@ -187,7 +187,7 @@ Socket.on("winners",(winners)=>{
         console.error('Error sharing:', error);
       }
     } else {
-      setAlert({
+      setAlertMsg({
         message:'Sharing is not supported in your browser.',
         type:'info'
       })
@@ -196,7 +196,7 @@ Socket.on("winners",(winners)=>{
   const startTournament = ()=>{
     if(players.length<4) 
       {
-        setAlert({
+        setAlertMsg({
           message:"Minimum 4 Players are required.",
           type:"warning"
         })
@@ -231,7 +231,7 @@ Socket.on("winners",(winners)=>{
   }
   return (
     <div className="flex flex-wrap justify-center items-center min-h-screen bg-gradient-to-br from-gray-800 via-gray-700 to-gray-950 py-4">
-    <Alert key={Date.now()*Math.random()} message={alert.message} type={alert.type}/>
+    <Alert key={Date.now()*Math.random()} message={alertMsg.message} type={alertMsg.type}/>
      <BackButton/>
      {round ===2 && <FinalRound socket = {Socket}/>}
       { round !== 2 && <div className="bg-gray-800 p-6 rounded-2xl shadow-lg w-96 text-center">

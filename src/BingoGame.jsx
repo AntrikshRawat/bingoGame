@@ -55,7 +55,7 @@ const BingoGame = () => {
   const [isBackTrigger, setIsBackTrigger] = useState(false);
   const[Socket,setSocket]=useState(socket);
   const gridRef = useRef(grid);
-    const [alert, setAlert] = useState({
+    const [alertMsg, setAlertMsg] = useState({
       message: '',
       type: ''
     });
@@ -63,16 +63,16 @@ const BingoGame = () => {
     setSocket(socket);
   },[Socket])
   useEffect(()=>{
-    if(alert.message !== '' && alert.message) {
+    if(alertMsg.message !== '' && alertMsg.message) {
       setTimeout(() => {
-        setAlert({
+        setAlertMsg({
           message:'',
           type:''
         })
       }, 1000);
     }
     return clearTimeout();
-  },[alert])
+  },[alertMsg])
   useEffect(() => {
     gridRef.current = grid;
     const count = calculateBingos(grid);
@@ -152,13 +152,13 @@ const BingoGame = () => {
     localStorage.setItem('userName',name);
     }
   }
-  }, [roomCode, isBackTrigger, Socket,navigate]);
+  }, [roomCode, isBackTrigger, Socket]);
 
   const handleCellClick = (row, col) => {
     cellClickSound.play();
     const cell = grid[row][col];
     if (!gameStarted && cell !== null){
-      setAlert({
+      setAlertMsg({
         message:"Cell already filled",
         type:"warning"
       })
@@ -177,7 +177,7 @@ const BingoGame = () => {
 
   const handleStartGame = () => {
     if (grid.flat().includes(null)){
-      setAlert({
+      setAlertMsg({
         message:"Please fill all the cells!",
         type:"error"
       })
@@ -219,9 +219,9 @@ const BingoGame = () => {
   
 
   const shareRoom = async () => {
-    if (navigator.share) {
+    if (window.navigator.share) {
       try {
-        await navigator.share({
+        await window.navigator.share({
           title: "Bingo Game",
           text: "Join my Bingo Room and play with me",
           url: `https://bingo-f.vercel.app/room/${roomCode}`,
@@ -230,7 +230,7 @@ const BingoGame = () => {
         console.error("Share failed:", err);
       }
     } else {
-      setAlert({
+      setAlertMsg({
         message:"Sharing not supported in your browser.",
         type:"warning"
       })
@@ -241,7 +241,7 @@ const BingoGame = () => {
     <>
       <PlayerSidebar socket={Socket} roomCode={roomCode} />
       <BackButton/>
-      <Alert key={Date.now()*Math.random()} message={alert.message} type={alert.type}/>
+      <Alert key={Date.now()*Math.random()} message={alertMsg.message} type={alertMsg.type}/>
       <div className="min-h-screen flex flex-col items-center text-white py-10">
         <h1 className="text-4xl font-bold mb-6">🎉 Bingo Game 🎲</h1>
       {isTour &&  <h1 className="text-2xl font-bold mb-6">Round:-{round}</h1>}
@@ -285,7 +285,7 @@ const BingoGame = () => {
                 key={`${rowIdx}-${colIdx}`}
                 value={cell}
                 onClick={() => handleCellClick(rowIdx, colIdx)}
-                disabled={gameStarted && !isTurn}
+                disabled={gameStarted && !isTurn && availableNumbers.length === 0}
               />
             ))
           )}

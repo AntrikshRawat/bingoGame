@@ -69,7 +69,7 @@ const CreateAndJoin = () => {
     if(name !== '' && name) {
       return name;
     }else{
-      name = `Player${Date.now().toString().slice(10)}`;
+      name = `Player${(Date.now() * Math.random()).toString().substring(0, 4)}`;
       return name;
     }
   }
@@ -95,7 +95,7 @@ const CreateAndJoin = () => {
           <button className='w-16 h-10 bg-gradient-to-r from-emerald-700 to-emerald-500 text-white rounded-r-lg hover:from-emerald-600 hover:to-emerald-800 transition-all shadow-md'
           disabled = {input.length===0}
           onClick={()=>{
-            localStorage.setItem('userName',`${input}`);
+            localStorage.setItem('userName',input);
             setUserName(getName());
           }}
           >Save</button>
