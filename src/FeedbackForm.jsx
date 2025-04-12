@@ -51,7 +51,7 @@ const FeedbackForm = () => {
 
   return (
     <div className="w-full bg-gray-900 py-10">
-     <Alert key={Date.now()} message={alert.message} type={alert.type}/>
+     <Alert key={Date.now()*Math.random()} message={alert.message} type={alert.type}/>
       <div className="w-full max-w-7xl mx-auto px-4">
         <div className="bg-gray-800 rounded-lg shadow-xl p-6">
           <h2 className="text-2xl font-bold text-white mb-6 text-center">Any Suggestions?</h2>

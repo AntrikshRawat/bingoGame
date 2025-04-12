@@ -66,14 +66,18 @@ const CreateAndJoin = () => {
   };
   function getName() {
     let name = localStorage.getItem('userName');
+    localStorage.clear();
     if(name !== '' && name) {
-      setUserName(name);
+      return name;
     }else{
-      localStorage.setItem('userName',`Player${Date.now().toString().slice(10)}`);
+      name = `Player${Date.now().toString().slice(10)}`;
+      return name;
     }
   }
   useEffect(()=>{
-    getName();
+    const name = getName();
+    localStorage.setItem("userName",name);
+    setUserName(name);
   },[]);
   return (
     <div className="flex flex-col items-center gap-4 min-h-screen justify-center">

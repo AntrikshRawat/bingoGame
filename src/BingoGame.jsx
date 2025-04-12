@@ -5,6 +5,7 @@ import PlayerSidebar from "./PlayerSidebar";
 import socket from "./socket";
 import cellclick from "../Sound-Effect/clicksound.wav";
 import BackButton from "./BackButton";
+import Alert from "./Alert";
 
 const cellClickSound = new Audio(cellclick);
 
@@ -53,6 +54,10 @@ const BingoGame = () => {
   const [isWinner, setIsWinner] = useState(false);
   const [isBackTrigger, setIsBackTrigger] = useState(false);
   const[Socket,setSocket]=useState(socket);
+    const [alert, setAlert] = useState({
+      message: '',
+      type: ''
+    });
   useEffect(()=>{
     setSocket(socket);
   },[Socket])
@@ -142,7 +147,13 @@ const BingoGame = () => {
   const handleCellClick = (row, col) => {
     cellClickSound.play();
     const cell = grid[row][col];
-    if (!gameStarted && cell !== null) return alert("Cell already filled");
+    if (!gameStarted && cell !== null){
+      setAlert({
+        message:"Cell already filled",
+        type:"warning"
+      })
+      return;
+    }
     if (!gameStarted && cell === null) {
       const newGrid = grid.map((r, i) =>
         r.map((c, j) => (i === row && j === col ? availableNumbers[0] : c))
@@ -155,7 +166,13 @@ const BingoGame = () => {
   };
 
   const handleStartGame = () => {
-    if (grid.flat().includes(null)) return alert("Please fill all the cells!");
+    if (grid.flat().includes(null)){
+      setAlert({
+        message:"Please fill all the cells!",
+        type:"error"
+      })
+      return;
+    }
     setWaiting(true);
     Socket.emit("submitGrid", roomCode);
   };
@@ -203,7 +220,10 @@ const BingoGame = () => {
         console.error("Share failed:", err);
       }
     } else {
-      alert("Sharing not supported in your browser.");
+      setAlert({
+        message:"Sharing not supported in your browser.",
+        type:"warning"
+      })
     }
   };
 
@@ -211,6 +231,7 @@ const BingoGame = () => {
     <>
       <PlayerSidebar socket={Socket} roomCode={roomCode} />
       <BackButton/>
+      <Alert key={Date.now()*Math.random()} message={alert.message} type={alert.type}/>
       <div className="min-h-screen flex flex-col items-center text-white py-10">
         <h1 className="text-4xl font-bold mb-6">🎉 Bingo Game 🎲</h1>
       {isTour &&  <h1 className="text-2xl font-bold mb-6">Round:-{round}</h1>}
