@@ -31,8 +31,6 @@ const FinalRound = ({socket}) => {
     setSocket(socket);
   },[socket]);
   useEffect(()=>{
-  })
-  useEffect(()=>{
     Socket.on("finalResult",(result)=>{
       isEnd(result.status);
       if(result.status) {
