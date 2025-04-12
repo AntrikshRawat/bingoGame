@@ -66,7 +66,6 @@ const CreateAndJoin = () => {
   };
   function getName() {
     let name = localStorage.getItem('userName');
-    localStorage.clear();
     if(name !== '' && name) {
       return name;
     }else{
@@ -76,6 +75,7 @@ const CreateAndJoin = () => {
   }
   useEffect(()=>{
     const name = getName();
+    localStorage.clear();
     localStorage.setItem("userName",name);
     setUserName(name);
   },[]);
@@ -96,7 +96,7 @@ const CreateAndJoin = () => {
           disabled = {input.length===0}
           onClick={()=>{
             localStorage.setItem('userName',`${input}`);
-            getName();
+            setUserName(getName());
           }}
           >Save</button>
 </span>

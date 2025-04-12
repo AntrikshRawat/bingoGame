@@ -54,6 +54,7 @@ const BingoGame = () => {
   const [isWinner, setIsWinner] = useState(false);
   const [isBackTrigger, setIsBackTrigger] = useState(false);
   const[Socket,setSocket]=useState(socket);
+  const gridRef = useRef(grid);
     const [alert, setAlert] = useState({
       message: '',
       type: ''
@@ -61,8 +62,17 @@ const BingoGame = () => {
   useEffect(()=>{
     setSocket(socket);
   },[Socket])
-  const gridRef = useRef(grid);
-
+  useEffect(()=>{
+    if(alert.message !== '' && alert.message) {
+      setTimeout(() => {
+        setAlert({
+          message:'',
+          type:''
+        })
+      }, 1000);
+    }
+    return clearTimeout();
+  },[alert])
   useEffect(() => {
     gridRef.current = grid;
     const count = calculateBingos(grid);

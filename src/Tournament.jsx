@@ -102,6 +102,18 @@ useEffect(() => {
 },[roomCode,Socket,round]);
 
 useEffect(()=>{
+    if(alert.message !== '' && alert.message) {
+      setTimeout(() => {
+        setAlert({
+          message:'',
+          type:''
+        })
+      }, 1000);
+    }
+    return clearTimeout();
+  },[alert])
+
+useEffect(()=>{
 Socket.on('host',(hostData)=>{
   setIsHost(Socket.id===hostData.socketId);
       if(Socket.id===hostData.socketId) {
@@ -182,7 +194,14 @@ Socket.on("winners",(winners)=>{
     }
   };
   const startTournament = ()=>{
-    if(players.length<4) return;
+    if(players.length<4) 
+      {
+        setAlert({
+          message:"Minimum 4 Players are required.",
+          type:"warning"
+        })
+        return;
+      }
     localStorage.setItem(`${roomCode}`,true);
     Socket.emit("startTournament",roomCode,index);
   }
@@ -240,7 +259,7 @@ Socket.on("winners",(winners)=>{
               </ul>
             </div>
           </div>
-  {isHost &&  <button className="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-all" disabled={players.length !== 4}
+  {isHost &&  <button className="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-all"
   onClick={startTournament}>
             Start Tournament
           </button>}
