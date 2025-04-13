@@ -102,8 +102,12 @@ const BingoGame = () => {
   }, [bingoCount, isTour, round, roomCode, isWinner,Socket]);
 
   useEffect(() => {
-    const name = localStorage.getItem("userName");
     const handleConnect = () => {
+      let name = localStorage.getItem("userName");
+      if(!name || name === '') {
+        name = `Player${(Date.now() * Math.random()).toString().substring(0, 4)}`;
+        localStorage.setItem('userName',name);
+      }
       Socket.emit("joinRoom", roomCode, name, (message) => {
         if (message) {
           alert(message);

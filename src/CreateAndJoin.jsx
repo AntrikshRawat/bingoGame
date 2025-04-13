@@ -66,12 +66,11 @@ const CreateAndJoin = () => {
   };
   function getName() {
     let name = localStorage.getItem('userName');
-    if(name !== '' && name) {
-      return name;
-    }else{
+    if(name === '' || name === null || name === undefined) {
       name = `Player${(Date.now() * Math.random()).toString().substring(0, 4)}`;
       return name;
     }
+    return name;
   }
   useEffect(()=>{
     const name = getName();

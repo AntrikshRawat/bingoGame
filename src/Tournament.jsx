@@ -75,7 +75,11 @@ if(round === null || round === undefined) return;
 },[Socket,round])
 // Initial join and setup
 useEffect(() => {
-  const name = localStorage.getItem('userName');
+  let name = localStorage.getItem('userName');
+  if(!name || name === '') {
+    name = `Player${(Date.now() * Math.random()).toString().substring(0, 4)}`;
+    localStorage.setItem('userName',name);
+  }
   const wasHost = localStorage.getItem(`host_${roomCode}`);
   const previousTournamet = localStorage.getItem(`${roomCode}`);
   if (!previousTournamet) {
