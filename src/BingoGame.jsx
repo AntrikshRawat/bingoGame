@@ -89,7 +89,7 @@ const BingoGame = () => {
   }, [Socket]);
 
   useEffect(() => {
-    if (bingoCount >= 5) {
+    if (bingoCount >= 5 && !winner) {
       Socket.emit("gameOver", roomCode);
       if (isTour) {
         setTimeout(() => {
@@ -99,7 +99,7 @@ const BingoGame = () => {
         }, 2000);
       }
     }
-  }, [bingoCount, isTour, round, roomCode, isWinner,Socket]);
+  }, [bingoCount, isTour, round, roomCode, isWinner,Socket,winner]);
 
   useEffect(() => {
     const handleConnect = () => {
